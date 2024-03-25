@@ -1,25 +1,27 @@
-
 pipeline {
     agent any
-
+    options {
+        skipStagesAfterUnstable()
+    }
     stages {
         stage('Build') {
             steps {
-                git 'https://github.com/mehtapy/spring_boot_jenkins.git'
-                sh './mvnw clean compile'
-                // bat '.\\mvnw clean compile'
+                sh 'mvn -B -DskipTests clean package'
             }
         }
         stage('Test') {
             steps {
-                sh './mvnw test'
-                // bat '.\\mvnw test'
+                sh 'mvn test'
             }
-
             post {
                 always {
-                    junit '**/target/surefire-reports/TEST-*.xml'
+                    junit 'target/surefire-reports/*.xml'
                 }
+            }
+        }
+        stage('Deliver') { 
+            steps {
+                sh './jenkins/scripts/deliver.sh' 
             }
         }
     }
